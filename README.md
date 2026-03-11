@@ -1,3 +1,4 @@
 # lukipuki
 skibid dva  
-test git    
+test git 
+dalsi test  
