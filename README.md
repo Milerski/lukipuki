@@ -1,3 +1,3 @@
 # lukipuki
 skibid dva  
-vojta je gay  
+test git    
