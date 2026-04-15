@@ -1,11 +1,17 @@
 import turtle
+import sys
+import subprocess
 import time
 import random
 import tkinter
+from tkinter import simpledialog
+import json
+import os
+import urllib.request
 
-APPLE_B64 = "R0lGODdhGQAZAIcAAPHGxu23tuiwr+SgoOCbnYCZa32bX3abXt2KidiKfdeLjXKTT3SLR16CMdp1atpvbdBxdtNlaLhtbZtzP1t+OVp7PFR2NVRrPjpqD0JnEDxnCUNmHjtiCMZUWtFQUKxXQbZOVbtKTrs/RaZFPINVWJNRVI9MT3VKTYVHNHA8PGpDRV9eNk5dEFZSJ1VJCzteEztaEC9VCDRTETNOEWRGS1hAQVo9LFRARDNDBi0/Gc47OsYtMsUrL8IsM6wsLr4lKrggJ7IdKa4lLawcJIg3OaogJnM1LHAxKm4gHZYcInweGnMdE2U2N2E3N1gtJ2AqK2EmJVkoKmAeD1sgGV8cHVYgIlUdFFkcHUo7QUY5QEg4PUwzND01Ozk0OTEvMygwKEsqLUonKEEkHTEtNSUkLSEmJEAfEywdJCsdFB8iKR8gKyAcKx8bIxsfKBkeKRgcJxsbJhgbIxYcJhQcJUUaCiAaIxoaJBoZJRoZJBoZIxkaIxkZJBkZIxgaJBgaIxgZJBgZIxcaIxcaIhcZJRcZJBcZIxcZIhYaIxYaIhYZJBYZIxYZIhUZJBUZIxUZIrMRGqUTGJ8THJ8SHJ8TF5oTG5MXGqkMFp4KE6UCDKgADZYME5UHEY4IEYcUHIsMFokFDXcECYMDCX8DCXoCCIwBCIMAAoEAAHsBBXwAAHcAAGsUFlITE08WF08GB2QDBGEEBVUEBHMBBW8AAmkBA2ABA1kAAUsSE0cPDzwVCkINEEEKDEMCAj0BAjoBATkRDxkYIzYIBzIGBTgAASwAABgYJBgYIxgYIhcYJBcYIxcYIhcXIxYYJBYYIxYYIhUYJBUYIxUYIhQYIhQYIBYXIxYXIhUXJBUXIhUXIRQXJBQXIhMXIxYWIhYWIRUWIxUWIhQWIxQWIhMWIhUVIhMTJBEXIhEVIREVHxIUIhIUIBEUIA0VHxITIBATHw4THhISIAwSHQsSHAoSHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAGQAZAEAI/wALISN0LJEiZo2WNWKmiNFCZ4qWPXvmaBkyhcgcLYomR4KOCAAQFJlEqhKLGBsqWFhwwd0eR4qQLVJE7Y0KVbJCnfp0SRKpVK+gMLkCRtsvZAcPIRt0SNFMRYWiSo16rFCiRYmsRnWqqBm0RXjetaFRosQIEyewrPlWqNq4boUiJltkzU0JS5mEUAIlxQyaFiNAdKLValWNbMUUJSJ2zOkiR4LStemiZQuYMGHOMGNWzBGjgwuXHWN4DFmjmXd+bRPHrdifiKUVlXbErNAyZov0wKPhYAePCBB6WPrkQkMGDhkafDmHaHMjP+pI/OgQQIQpJFboTGlRoICBFU60mP8jFBE3HnUqkpwK5SlJJCEOEAgIUUoVEyhdyvFppChZTEV7pMNFE7oIw8suu/QiTC62VFEHYosY4sgxxzSCDDGMEWOIIoQUM00zyADSWDMUImNiRIwhMxpuisDEYSGG8LehaIocxJBMzGQUkR3bwEOOGmSooU070hzSCCKIOAUTQwg5kkc8WEjgARCPZHJJJ0SsIAMMM+RQhjiLsLhMH+9k8cAPEQgwAAEhDGEEBi/AsAEFC6ThTUSKNBJHPDd4oEMABECCyixIIIGDBQUcsAADXqzzx2Z5NjNHCY8EAUEkoByBixk2LGGEE7gMc0sN4fwRpkLKyGECJJhswskoSqCSMMEHCRCgySxUXLFFOMTwx4wjfbDDBRGziMJJEpIMoYACPpTiSgpPPEEGOIBAddEyf6AzRgqw1FKLK7HI8korVUTBShRsTFPMIgvhuMhA5oxRQxi+ABMMMLewIkYd2ADS7iIWvZsMQswEcg071sABxx7ZYENMMfzV+GuOzJRWTDLJmHgtwKWZaEwxxRiDTDHIBAQAOw=="
-HEAD_B64 = "R0lGODdhFAAUAIcAAJb7TIb6RoP7Ro/vR4jvR4fsRIXtQnz5PX/1QHvzQXPxQHbuP2fsPIDrQ4LpQ3fpPm/nOW7hP2TlOmDfNF/eNFrfOnfaPWzYNmDdPl/XM17bOVzUNFbcNFbXMlbUOFTPK1PbNlHcN0/aME3cMVLXM0nVK1DPNFHONEfRLVrLM1jKLk3KL0zMMUbGMEHCK0bBL0HBKT/JKjnGJT7FKm6xOEW/LUC9LD22KT22ID6qIjq6Jju1JzquJzLCIDe/JS+9HDW6Hi23Giu3GjSzISyzFyuyGzCvHimtGyauFSuqGiWwFyKqFyKnFTCTGSyjGC6dHymkGiqbHSilGSekGSWlFiWkFySgFlmNOVaIN1KINVSGNFGGNVCHKkuENEiFL0ODMUKFJCOiFiOfFiGeFh6cEyCZFBuZERuXEReYECGVFRmSEBWTDxKRDB2KEyCFFhiLDg+KDEiBND58Lz57MTx6Lzx4LTx3Kzl6Lzh4Ljd3LzN4KzV2LTJ1JjN0LDFzKy5xKy5xHjlsICtuKCptIidoIx6AFA+CCA56CRp5EBF3CxBzDBBxCxFvDA5rDA9qCiRoICRnICFnICNjISFkFx5jHgpnCAhmCCxeGiNbISZYFhpdGhlYGRpUExdbDhVVFxJUDDhSLTRSLSBNExdPEBxFFh1AIhRRGBNMDg9MCxVLDxNJGBE+FQ47FAw7CBU1DRkwDx0fJh0fJRwfJRwfJBsfJRofJBofIxweJRweJBseJRseJBwdJBsdJRsdJBoeJRoeJBoeIxkeJBodJRodJBodIxscJRscJBocJRocJBsbJRsbJBsbIxobJRobJBsYJxsXJxsXJRoXJBwVJxsVJxoWJBsUJxsTJxoTJhsSJhsRJxoRJhoQJhYTIxkSJRkRJRkQJRkQJBgQJQMYAgAZAA4RBwoRBxgPJBcPJBcOJBYPIxYOJBYOIxUOJBUOIxUNIxMNIhQMIxMMIxIMIhEMIgcMBBELIhEKIQMJAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAFAAUAEAI/wCTMTPmS5auX7loyYp1K5dDYbJ4NVt2qx0dDkbepCJ16UmhTK5O7UCjRJK3XLHsXTlABUGHMoaQ6EjwgYkIACUoadPVSxslM41ewKhyRoolHh5qiPHQhpWzYcOkqXISIYqEQOS4ACrXakwYNhO6xIuFDFqpQXE2eSKEZ84VOX729FllJxS3XbLmYYGwRgwnV5capAHJCQMAHKaq8bqFbg8DB4jIdKJ37x69T0VOFJDwx9wtXOvuoLBiYIOPMZbKMJlxY9GJIJuu9ULGi1s8cPLgdZv2bd08dtvayUNHrViyZseghYOHzVq4de7suTu3Lt2zddyEKeuVTdOPFEWW/M1AQcIChxAgYrRZUaddrlvn+sRQw8iGjyMtGlnIsMQEgSZOLfZOHBSYYYY4+LyigBDjJFiBCkRsgk0vsOgVAAtGzLAADfjgQ8MGcCRiBQp5qIMLL9OoksMAjgwxSYcddvLDFEMssMU8svziDSQ9uKCBAGCI8sAIo6CSBhRSyCCIObrIUg8WFzTCghuHsHFIJTs8oUgSDgDhiTW86MINKF5AosUXmKjyiB5Z2BEJHlvwUUo0xjTTTELAzDLLL8HoosssuPxSiyy2ENMMMgEBADs="
-BODY_B64 = "R0lGODdhFAAUAIcAAD2wMS+oJTKkKjCjJyqjITKiKCqdIiqdIS2cJCqbIimbIiWbHSaaHyeXICuWJC2VJSaVHyaTHyWTHiWTHSCTGyiRIimQISWRHiSPHiOPHSGSGiKPHB+RGR2QGB2PGByPFyqLIiOMHR+OGh+NGx+NGh+LGSOKHSCJGx+IGB6NGB6KGB6JGh6IFx2NGByLFx2JGRuJFxuJFh2IGRyIGBuIFxiIEx2HGR2HGB2HFx6GGRuHFxiHFBiGFB2EFxuEFhuCFxeDExeCFBWDExiBFBaBEheAExh/FBWBEhR/ERN/ERl9FBh8Exd6EhR7EhN7ERF7DhJ6EBF6DxZ3ExR3ERJ4EA12DBZ1EhFuEW1FJG1DJg1yDQtuCmdAJGg/JGc/I2M9ImE8ImE8IWQ7ImI7IWE7IWA+H189H14+IWA8I2A8IWA6IGA6H2E5H186IF45H143H108JFw6H1o5H1w4Hls3Hlk3HVc6IFY3HFI3IUk9Hk03Ilo2HVk2HVo1Hlk1HFg2HFc2HVYzHFUzHFQzHFI0HE0yHFIxGUg0JUg1GkwxHE4vGUowGkU+G0A7Gzs7Gj44GUA3GD82Gz42HUA1GkA0GD40FzU0FEIzGEEyGkUxJEIxJUIwJUIwI0EvJD8vJDowFDgvFTUvFzQvFDMwFD8uIz0tIj4sIjwsIjwsITssIjssITosIzotFTctFDYsEzQsEzMtEzMsEi0uEScsDTsrIjoqIDkqIDgrIDgpITcpIDcoIDgpHzcpHzgqEzgrEjopETcoHzQqJjYpHzYoHzUoHzIpEDYnHzUnHjQmHjMmHzQmHTMmHTUnEDInDzEkHTAkHDEjHSsnDisjIikjIiwmDRkbIhkbIRoaIRkaIRoZIRkZIRkZIBkYIRkYIBgbIRgaIRgaIBcaIRgZIRgZIBcZIBgYIRYYIRUYIhUYIRQYIRMYIhMYIRYXIRUXIRUXIBQXIRMXIRMXIBIXIRIXIBQWIRQWHxMWIRMWIBMVIBIWIRIWIBIVIBEWIBEVIBAVIAAAACwAAAAAFAAUAEAI/wCxidt2Ldu2bdywYTv4TZs2bNq4lSunTZ8qPrFYcNDRIkWRDD540JjFxhY8iP4OnSEEqA6XNnsEffHzB42dMrvkKXxnTM6iVqKKjYpmiRqsSK8S4dEV79s3eLf2SApRxUMUKBSIYHhBxREdZ/CqjasX7JAuTclyeTqVChWpYbg21ZKGTpy4fKnUPHqR5MkRIEgCCBBigZUiZ+/GYeNXSowlFwA0bBhQgAYRBUyYhSHF79rTU2l+WTGRY8KSHEZK9JAyydCwc9fGiXOXr907ePbg8ZvHz546fvjymYNIrpu7ffTuvbt9jx49eO+Sv2OnjZy1fpmwxCHjhk+WQH3WeMDhYuiOGVP5BNoDNsgVCARKtEyRoKLCgyug4Gjat+3uMjCNNLFCAgZAcMIWLgTxQyiGPLNOONjIkwogzSxBQAxNzNCAAzYscMMob5xyEjbzEDOGLEIwsEMEIshwAAlO4NCMG53ocw048tgyRy8owDDEBxdo0EENHYzASBfDvOOZPqvoAQgmiORBiS+QfJLHJZUUIgc06WAzzjzBcJLMMbzQogwqwqiCDDK05LLLNOg4JM41dF6j0J3e2GmNndg0FBAAOw=="
+APPLE_B64 = 'iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAuklEQVR4nGNgIBJ0uwr/73YV/k9IHROxBsKA0Vmj/0ZnjXAaTJSBMJct75BHMZgsA++I2BD0JjJgJNWgsJ3fGBgYGBhWuXMxqLw5gqEfq4Eww5QNjzAwMDAw3D1vg9NF6IZieBndMHQ2LvU4DcRlAD5DcRpIagRg04fVhdjCDF84IgOcyQbZAGINY2BgYGDBJ0mKQTBActYjyUBsCZUYgKyPti5Et40YQDCnkGIo0XkZGWBL7OSG9eAAACVcQ2N+TxIKAAAAAElFTkSuQmCC'
+HEAD_B64 = 'iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAuUlEQVR4nNWUsRHCMAxFvzhKpjADUGUWFrGnCItkFqoMYE1BHyrnZFsi4uA4otLfevqyZQP/HrS1IYxhadc4sZlnChrIA1aBEnbC0OkP3E3owYLlyMiRVWdSazupgBJGBBABc5wq2BynVdOgncNPY+2/VClnVpxdbtcuqdXKmXJiOlqVNJBH+3rLOwKWAZVD6wl5IRVQ2+SFqQ5lFQ/Uen6dQw/01Vv+zW+jgXNinMdggt6OBdh0DABP0Qlcm5VhR7wAAAAASUVORK5CYII='
+BODY_B64 = 'iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAjklEQVR4nM2UwRGAIAwExbESPlZoFVboJ63oK8iEHBwM43hPcqw5CC7L3xVahnjG267JIXAfLHggBryOwpCvALIw5A+1okoueT17dMEaf6t9PQfZNQROkXujWul+91JQd0wdAkf1HRAdequegLXnxIgaG+2CmUNV0dXI+OTpijPsjW797qWwUM83/X84XQ9Bqz4iC5gUkwAAAABJRU5ErkJggg=='
 
 delay = 0.1
 score = 0
@@ -16,13 +22,168 @@ current_border = 120 # Počáteční zmenšená hranice
 wn = turtle.Screen()
 wn.title("Hra Had (Snake) - Vylepšená verze")
 wn.bgcolor("#1a1a24")  # Moderní tmavé pozadí
-wn.setup(width=600, height=600)
+wn.setup(width=900, height=600)  # Rozšíření pro postranní panel
 wn.tracer(0) # Vypne aktualizace obrazovky pro plynulost
 
+SERVER_URL = "http://127.0.0.1:5000/leaderboard"
+server_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.py")
+
+# Automatické spuštění serveru
+try:
+    req = urllib.request.Request(SERVER_URL)
+    urllib.request.urlopen(req, timeout=0.2)
+except:
+    subprocess.Popen([sys.executable, server_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(0.5)
+
+# Přihlášení hráče
+player_name = "Host"
+player_password = ""
+
+def ask_player_name():
+    global player_name, player_password
+    
+    def on_login(event=None):
+        global player_name, player_password
+        val = entry.get()
+        pwd = entry_pwd.get()
+        if val.strip() == "" or pwd.strip() == "":
+            lbl_error.config(text="Zadej jméno a heslo!", fg="red")
+            return
+            
+        pn = val.strip()
+        
+        try:
+            data = json.dumps({"name": pn, "password": pwd}).encode('utf-8')
+            req = urllib.request.Request(SERVER_URL.replace("/leaderboard", "/login"), data=data, headers={'Content-Type': 'application/json'})
+            response = urllib.request.urlopen(req, timeout=1)
+            res_data = json.loads(response.read().decode('utf-8'))
+            if not res_data.get("success"):
+                lbl_error.config(text=res_data.get("error", "Chyba přihlášení!"), fg="red")
+                return
+        except urllib.error.HTTPError as e:
+            try:
+                err_data = json.loads(e.read().decode('utf-8'))
+                lbl_error.config(text=err_data.get("error", "Chyba přihlášení!"), fg="red")
+            except:
+                lbl_error.config(text="Chyba přihlášení!", fg="red")
+            return
+        except Exception as e:
+            pass # Lokální hraní
+            
+        player_name = pn
+        player_password = pwd
+        login_win.destroy()
+
+    def on_register(event=None):
+        val = entry.get()
+        pwd = entry_pwd.get()
+        if val.strip() == "" or pwd.strip() == "":
+            lbl_error.config(text="Zadej jméno a heslo!", fg="red")
+            return
+            
+        pn = val.strip()
+        try:
+            data = json.dumps({"name": pn, "password": pwd}).encode('utf-8')
+            req = urllib.request.Request(SERVER_URL.replace("/leaderboard", "/register"), data=data, headers={'Content-Type': 'application/json'})
+            response = urllib.request.urlopen(req, timeout=1)
+            res_data = json.loads(response.read().decode('utf-8'))
+            if not res_data.get("success"):
+                lbl_error.config(text=res_data.get("error", "Chyba registrace!"), fg="red")
+                return
+            lbl_error.config(text="Úspěšně registrováno! Nyní se přihlas.", fg="#00ff00")
+        except urllib.error.HTTPError as e:
+            try:
+                err_data = json.loads(e.read().decode('utf-8'))
+                lbl_error.config(text=err_data.get("error", "Chyba registrace!"), fg="red")
+            except:
+                lbl_error.config(text="Chyba registrace!", fg="red")
+            return
+        except Exception as e:
+            lbl_error.config(text="Server offline! Nelze registrovat.", fg="red")
+
+    root = wn.getcanvas().winfo_toplevel()
+    login_win = tkinter.Toplevel(root)
+    login_win.title("Přihlášení - Luki Puki Snake")
+    login_win.geometry("400x400")
+    login_win.configure(bg="#1a1a24")
+    login_win.transient(root)
+    login_win.grab_set()
+
+    lbl = tkinter.Label(login_win, text="🐍 LUKI PUKI SNAKE 🐍", bg="#1a1a24", fg="#00ff00", font=("Verdana", 18, "bold"))
+    lbl.pack(pady=10)
+
+    lbl_sub = tkinter.Label(login_win, text="Přezdívka (pro světovou tabulku):", bg="#1a1a24", fg="white", font=("Verdana", 10))
+    lbl_sub.pack()
+    entry = tkinter.Entry(login_win, font=("Verdana", 14), bg="#2a2a35", fg="white", insertbackground="white", justify="center")
+    entry.pack(pady=5)
+    
+    lbl_pwd = tkinter.Label(login_win, text="Heslo:", bg="#1a1a24", fg="white", font=("Verdana", 10))
+    lbl_pwd.pack()
+    entry_pwd = tkinter.Entry(login_win, font=("Verdana", 14), bg="#2a2a35", fg="white", insertbackground="white", justify="center", show="*")
+    entry_pwd.pack(pady=5)
+    entry.focus()
+
+    lbl_error = tkinter.Label(login_win, text="", bg="#1a1a24", fg="red", font=("Verdana", 10, "bold"))
+    lbl_error.pack()
+
+    # Frame for buttons
+    btn_frame = tkinter.Frame(login_win, bg="#1a1a24")
+    btn_frame.pack(pady=10)
+
+    btn_login = tkinter.Button(btn_frame, text="PŘIHLÁSIT", command=on_login, bg="#00ff00", fg="black", font=("Verdana", 10, "bold"), width=12)
+    btn_login.grid(row=0, column=0, padx=5)
+    
+    btn_register = tkinter.Button(btn_frame, text="REGISTROVAT", command=on_register, bg="#00aaff", fg="black", font=("Verdana", 10, "bold"), width=12)
+    btn_register.grid(row=0, column=1, padx=5)
+    
+    lbl_contact = tkinter.Label(login_win, text="Kontakt na autora: lukasscrpitcz@gmail.com", bg="#1a1a24", fg="#aaaaaa", font=("Verdana", 8))
+    lbl_contact.pack(side="bottom", pady=5)
+    
+    login_win.bind("<Return>", on_login)
+    root.wait_window(login_win)
+
+ask_player_name()
+
+# Načtení lokální tabulky
+leaderboard_file = "leaderboard.json"
+if os.path.exists(leaderboard_file):
+    try:
+        with open(leaderboard_file, "r") as f:
+            leaderboard = json.load(f)
+    except:
+        leaderboard = {}
+else:
+    leaderboard = {}
+
+high_score = leaderboard.get(player_name, 0)
+
+def upload_score(player, score):
+    try:
+        data = json.dumps({"name": player, "password": player_password, "score": score}).encode('utf-8')
+        req = urllib.request.Request(SERVER_URL, data=data, headers={'Content-Type': 'application/json'})
+        urllib.request.urlopen(req, timeout=1)
+    except:
+        pass
+
+def fetch_leaderboard():
+    try:
+        req = urllib.request.Request(SERVER_URL)
+        response = urllib.request.urlopen(req, timeout=1)
+        data = json.loads(response.read().decode('utf-8'))
+        return data
+    except:
+        return None
+
+# Počáteční synchronizace
+if high_score > 0:
+    upload_score(player_name, high_score)
+
 # Registrace nových textur z base64
-apple_img = tkinter.PhotoImage(data=APPLE_B64)
-head_img = tkinter.PhotoImage(data=HEAD_B64)
-body_img = tkinter.PhotoImage(data=BODY_B64)
+root = wn.getcanvas().winfo_toplevel()
+apple_img = tkinter.PhotoImage(master=root, data=APPLE_B64)
+head_img = tkinter.PhotoImage(master=root, data=HEAD_B64)
+body_img = tkinter.PhotoImage(master=root, data=BODY_B64)
 
 wn.register_shape("apple_tex", turtle.Shape("image", apple_img))
 wn.register_shape("head_tex", turtle.Shape("image", head_img))
@@ -64,7 +225,51 @@ food.goto(0,100)
 segments = []
 
 # Text scóre
+pen = turtle.Turtle()
+pen.speed(0)
+pen.color("white")
+pen.penup()
+pen.hideturtle()
+pen.goto(0, 260)
+pen.write(f"Hráč: {player_name} | Skóre: {score} | Nejlepší: {high_score}", align="center", font=("Verdana", 14, "bold"))
+
+leaderboard_pen = turtle.Turtle()
+leaderboard_pen.speed(0)
+leaderboard_pen.color("yellow")
+leaderboard_pen.penup()
+leaderboard_pen.hideturtle()
+leaderboard_pen.goto(300, 150)
+
+def update_sidebar_leaderboard():
+    leaderboard_pen.clear()
+    lb_data = fetch_leaderboard()
+    if lb_data is None:
+        leaderboard_pen.write("Server\nnedostupný", align="left", font=("Verdana", 10, "bold"))
+    elif not lb_data:
+        leaderboard_pen.write("Světová tabulka:\nZatím prázdná!", align="left", font=("Verdana", 10, "bold"))
+    else:
+        sorted_lb = sorted(lb_data.items(), key=lambda x: x[1], reverse=True)[:10]
+        text = "SVĚTOVÁ TABULKA\n\n"
+        for i, (p, s) in enumerate(sorted_lb):
+            short_p = p[:12] + ".." if len(p) > 12 else p
+            text += f"{i+1}. {short_p} - {s}\n"
+        leaderboard_pen.write(text, align="left", font=("Verdana", 10, "bold"))
+
+# První načtení postranního panelu
+update_sidebar_leaderboard()
+
+def go_up():
+    if head.direction != "down":
+        head.direction = "up"
+
+def go_down():
+    if head.direction != "up":
+        head.direction = "down"
+
+def go_left():
+    if head.direction != "right":
         head.direction = "left"
+
 
 def go_right():
     if head.direction != "left":
@@ -116,7 +321,10 @@ while True:
         draw_border(current_border)
         delay = 0.1
         pen.clear()
-        pen.write(f"Skóre: {score}  Nejlepší: {high_score}", align="center", font=("Verdana", 20, "bold"))
+        pen.write(f"Hráč: {player_name} | Skóre: {score} | Nejlepší: {high_score}", align="center", font=("Verdana", 14, "bold"))
+        
+        # Aktualizace tabulky po smrti
+        update_sidebar_leaderboard()
 
     # 2. Snězení jídla
     if head.distance(food) < 20:
@@ -140,6 +348,10 @@ while True:
         score += 10
         if score > high_score:
             high_score = score
+            leaderboard[player_name] = high_score
+            with open(leaderboard_file, "w") as f:
+                json.dump(leaderboard, f)
+            upload_score(player_name, high_score)
         
         # Zvětšení dynamického ohraničení
         if current_border < 280:
@@ -147,7 +359,7 @@ while True:
             draw_border(current_border)
         
         pen.clear()
-        pen.write(f"Skóre: {score}  Nejlepší: {high_score}", align="center", font=("Verdana", 20, "bold"))
+        pen.write(f"Hráč: {player_name} | Skóre: {score} | Nejlepší: {high_score}", align="center", font=("Verdana", 14, "bold"))
 
     # 3. Přeskládání dílků těla
     for index in range(len(segments)-1, 0, -1):
@@ -177,6 +389,9 @@ while True:
             score = 0
             delay = 0.1
             pen.clear()
-            pen.write(f"Skóre: {score}  Nejlepší: {high_score}", align="center", font=("Verdana", 20, "bold"))
+            pen.write(f"Hráč: {player_name} | Skóre: {score} | Nejlepší: {high_score}", align="center", font=("Verdana", 14, "bold"))
+            
+            # Aktualizace tabulky po smrti
+            update_sidebar_leaderboard()
 
     time.sleep(delay)
